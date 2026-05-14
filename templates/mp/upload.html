@@ -1,17 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Upload &middot; FaceMood{% endblock %}
+{% block title %}Detect mood &middot; FaceMood Music{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
   <div class="col-md-7">
     <div class="card shadow-sm">
       <div class="card-body">
-        <h2 class="card-title mb-3">Upload a face photo</h2>
+        <h2 class="card-title mb-1">Upload a face photo</h2>
+        <p class="text-muted">We'll detect your mood and play matching music.</p>
         <form method="post" enctype="multipart/form-data">
           {% csrf_token %}
           {{ form.image.label_tag }}
           {{ form.image }}
           {% if form.image.errors %}<div class="text-danger small mt-2">{{ form.image.errors }}</div>{% endif %}
-          <button type="submit" class="btn btn-primary mt-3">Predict emotion</button>
+          <button type="submit" class="btn btn-primary mt-3">🎵 Detect mood &amp; play</button>
         </form>
       </div>
     </div>

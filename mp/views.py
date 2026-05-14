@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .emotion import predict_emotion
 from .forms import UploadImageForm
-from .models import Prediction
+from .models import Prediction, Song
 
 
 def home(request):
@@ -37,10 +37,15 @@ def result(request, pk):
     sorted_scores = sorted(
         prediction.raw_scores.items(), key=lambda kv: kv[1], reverse=True
     )
+    playlist = Song.objects.filter(mood=prediction.predicted_emotion).order_by("?")[:20]
     return render(
         request,
         "mp/result.html",
-        {"prediction": prediction, "sorted_scores": sorted_scores},
+        {
+            "prediction": prediction,
+            "sorted_scores": sorted_scores,
+            "playlist": playlist,
+        },
     )
 
 
@@ -48,3 +53,11 @@ def result(request, pk):
 def history(request):
     predictions = Prediction.objects.filter(user=request.user)
     return render(request, "mp/history.html", {"predictions": predictions})
+
+
+def library(request):
+    songs_by_mood = {
+        mood: Song.objects.filter(mood=mood)
+        for mood in ("angry", "happy", "neutral", "sad")
+    }
+    return render(request, "mp/library.html", {"songs_by_mood": songs_by_mood})

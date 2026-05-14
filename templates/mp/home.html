@@ -1,21 +1,31 @@
 {% extends "base.html" %}
-{% block title %}Home &middot; FaceMood{% endblock %}
+{% block title %}Home &middot; FaceMood Music{% endblock %}
 {% block content %}
-<div class="p-5 mb-4 bg-white rounded-3 shadow-sm">
-  <h1 class="display-5 fw-bold">Detect emotion from a face photo</h1>
-  <p class="lead">Upload a photo and the model classifies it as <strong>angry</strong>, <strong>happy</strong>, <strong>neutral</strong>, or <strong>sad</strong>.</p>
+<div class="p-5 mb-4 bg-white rounded-3 shadow-sm text-center">
+  <h1 class="display-5 fw-bold">🎵 Music that matches your mood</h1>
+  <p class="lead">Upload a photo of your face. We detect your emotion and play songs that match — <strong>angry</strong>, <strong>happy</strong>, <strong>neutral</strong>, or <strong>sad</strong>.</p>
   {% if user.is_authenticated %}
-    <a class="btn btn-primary btn-lg" href="{% url 'mp:upload' %}">Try it</a>
+    <a class="btn btn-primary btn-lg" href="{% url 'mp:upload' %}">Detect mood & play</a>
+    <a class="btn btn-outline-secondary btn-lg" href="{% url 'mp:library' %}">Browse library</a>
   {% else %}
     <a class="btn btn-primary btn-lg" href="{% url 'accounts:login' %}">Login to start</a>
     <a class="btn btn-outline-secondary btn-lg" href="{% url 'accounts:signup' %}">Create account</a>
   {% endif %}
 </div>
 
-<div class="row g-4">
-  <div class="col-md-3"><div class="card text-center p-3"><h3>😠</h3><div>Angry</div></div></div>
-  <div class="col-md-3"><div class="card text-center p-3"><h3>😀</h3><div>Happy</div></div></div>
-  <div class="col-md-3"><div class="card text-center p-3"><h3>😐</h3><div>Neutral</div></div></div>
-  <div class="col-md-3"><div class="card text-center p-3"><h3>😢</h3><div>Sad</div></div></div>
+<div class="row g-4 text-center">
+  <div class="col-md-3"><div class="card p-3"><h3>😠</h3><div class="fw-bold">Angry</div><small class="text-muted">Heavy / rock</small></div></div>
+  <div class="col-md-3"><div class="card p-3"><h3>😀</h3><div class="fw-bold">Happy</div><small class="text-muted">Upbeat / dance</small></div></div>
+  <div class="col-md-3"><div class="card p-3"><h3>😐</h3><div class="fw-bold">Neutral</div><small class="text-muted">Chill / ambient</small></div></div>
+  <div class="col-md-3"><div class="card p-3"><h3>😢</h3><div class="fw-bold">Sad</div><small class="text-muted">Melancholy / soft</small></div></div>
+</div>
+
+<div class="mt-5">
+  <h4>How it works</h4>
+  <ol>
+    <li>Upload a face photo (selfie or any clear face image).</li>
+    <li>A pretrained deep-learning model (DeepFace) classifies your emotion.</li>
+    <li>The app fetches a playlist tagged with that mood and starts playing instantly.</li>
+  </ol>
 </div>
 {% endblock %}

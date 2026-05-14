@@ -2,6 +2,29 @@ from django.conf import settings
 from django.db import models
 
 
+MOOD_CHOICES = [
+    ("angry", "Angry"),
+    ("happy", "Happy"),
+    ("neutral", "Neutral"),
+    ("sad", "Sad"),
+]
+
+
+class Song(models.Model):
+    title = models.CharField(max_length=200)
+    artist = models.CharField(max_length=200, blank=True)
+    mood = models.CharField(max_length=16, choices=MOOD_CHOICES, db_index=True)
+    audio = models.FileField(upload_to="songs/")
+    cover = models.ImageField(upload_to="covers/", blank=True, null=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["mood", "title"]
+
+    def __str__(self):
+        return f"{self.title} ({self.mood})"
+
+
 class Prediction(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

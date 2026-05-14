@@ -1,6 +1,13 @@
 from django.contrib import admin
 
-from .models import Prediction
+from .models import Prediction, Song
+
+
+@admin.register(Song)
+class SongAdmin(admin.ModelAdmin):
+    list_display = ("title", "artist", "mood", "uploaded_at")
+    list_filter = ("mood",)
+    search_fields = ("title", "artist")
 
 
 @admin.register(Prediction)
