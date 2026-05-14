@@ -1,0 +1,5 @@
+body { font-family: 'Segoe UI', system-ui, sans-serif; }
+.navbar-brand { letter-spacing: 1px; }
+.card { border: none; border-radius: 12px; }
+.progress-bar { background-color: #0d6efd; }
+.btn { border-radius: 8px; }

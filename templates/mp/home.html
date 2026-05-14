@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Home &middot; FaceMood{% endblock %}
+{% block content %}
+<div class="p-5 mb-4 bg-white rounded-3 shadow-sm">
+  <h1 class="display-5 fw-bold">Detect emotion from a face photo</h1>
+  <p class="lead">Upload a photo and the model classifies it as <strong>angry</strong>, <strong>happy</strong>, <strong>neutral</strong>, or <strong>sad</strong>.</p>
+  {% if user.is_authenticated %}
+    <a class="btn btn-primary btn-lg" href="{% url 'mp:upload' %}">Try it</a>
+  {% else %}
+    <a class="btn btn-primary btn-lg" href="{% url 'accounts:login' %}">Login to start</a>
+    <a class="btn btn-outline-secondary btn-lg" href="{% url 'accounts:signup' %}">Create account</a>
+  {% endif %}
+</div>
+
+<div class="row g-4">
+  <div class="col-md-3"><div class="card text-center p-3"><h3>😠</h3><div>Angry</div></div></div>
+  <div class="col-md-3"><div class="card text-center p-3"><h3>😀</h3><div>Happy</div></div></div>
+  <div class="col-md-3"><div class="card text-center p-3"><h3>😐</h3><div>Neutral</div></div></div>
+  <div class="col-md-3"><div class="card text-center p-3"><h3>😢</h3><div>Sad</div></div></div>
+</div>
+{% endblock %}
