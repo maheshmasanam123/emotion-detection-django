@@ -1,5 +1,13 @@
 # FaceMood Music — Live Mood Detection & Music Journey
 
+[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Django](https://img.shields.io/badge/django-4.2+-092E20.svg?logo=django&logoColor=white)](https://www.djangoproject.com/)
+[![DeepFace](https://img.shields.io/badge/ML-DeepFace-orange.svg)](https://github.com/serengil/deepface)
+[![Bootstrap](https://img.shields.io/badge/UI-Bootstrap%205-7952B3.svg?logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/maheshmasanam123/emotion-detection-django.svg)](https://github.com/maheshmasanam123/emotion-detection-django/commits/main)
+[![GitHub stars](https://img.shields.io/github/stars/maheshmasanam123/emotion-detection-django?style=social)](https://github.com/maheshmasanam123/emotion-detection-django/stargazers)
+
 A Django web app that **detects your emotion live from the webcam** and plays a **mood-journey playlist** — songs that meet you where you are emotionally and gradually lift you to where you want to be. Music can be uploaded files **or** YouTube / Spotify / SoundCloud links.
 
 > Final-year college project — Computer Science.

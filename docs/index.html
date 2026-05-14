@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FaceMood Music — Mood-Detecting Music Player</title>
+  <meta name="description" content="Live webcam mood detection that plays a mood-journey playlist. Django + DeepFace + YouTube/Spotify embeds.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: linear-gradient(135deg, #667eea, #764ba2); color: white; min-height: 100vh; }
+    .glass { background: rgba(255,255,255,0.10); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.18); border-radius: 16px; }
+    .hero h1 { font-size: 3.5rem; font-weight: 800; }
+    .emoji-row { font-size: 2.5rem; }
+    .badge-tech { background: rgba(255,255,255,0.18); color: white; font-weight: 500; }
+    a.btn-light { color: #667eea; font-weight: 600; }
+    .journey-card { background: rgba(0,0,0,0.20); border-radius: 12px; padding: 1.5rem; height: 100%; }
+    footer { opacity: 0.7; }
+  </style>
+</head>
+<body>
+
+<nav class="container py-4 d-flex justify-content-between align-items-center">
+  <span class="fs-4 fw-bold">🎵 FaceMood Music</span>
+  <a href="https://github.com/maheshmasanam123/emotion-detection-django" class="btn btn-light btn-sm">View on GitHub ↗</a>
+</nav>
+
+<header class="container hero text-center my-5">
+  <h1>Music that journeys with your mood</h1>
+  <p class="lead mt-3">Look at the camera. We detect your emotion and play a curated playlist that gently lifts you up.</p>
+  <div class="emoji-row my-4">😢 → 💪 → ✨ → 😀</div>
+  <a href="https://github.com/maheshmasanam123/emotion-detection-django" class="btn btn-light btn-lg me-2">⭐ Star on GitHub</a>
+  <a href="https://github.com/maheshmasanam123/emotion-detection-django/releases/latest" class="btn btn-outline-light btn-lg">Download v1.0</a>
+</header>
+
+<section class="container my-5">
+  <div class="glass p-4 p-md-5">
+    <h2 class="text-center mb-4">How it works</h2>
+    <div class="row g-4">
+      <div class="col-md-4 text-center">
+        <div class="fs-1">📷</div>
+        <h5>1. Open camera</h5>
+        <p class="small opacity-75">Allow browser camera access on the Live page. Your face is processed locally — no images leave your machine.</p>
+      </div>
+      <div class="col-md-4 text-center">
+        <div class="fs-1">🧠</div>
+        <h5>2. Detect emotion</h5>
+        <p class="small opacity-75">A pretrained DeepFace model classifies your mood into <strong>angry / happy / neutral / sad</strong> in milliseconds.</p>
+      </div>
+      <div class="col-md-4 text-center">
+        <div class="fs-1">🎶</div>
+        <h5>3. Play a mood journey</h5>
+        <p class="small opacity-75">Instead of just matching your mood, we play a curated <strong>journey</strong> that transitions you to a better one.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container my-5">
+  <h2 class="text-center mb-4">Mood journeys</h2>
+  <div class="row g-3">
+    <div class="col-md-3"><div class="journey-card text-center"><div class="emoji-row">😢→💪→😀</div><strong>Sad</strong><div class="small opacity-75 mt-2">sad → motivation → uplift → happy</div></div></div>
+    <div class="col-md-3"><div class="journey-card text-center"><div class="emoji-row">😠→😌→😀</div><strong>Angry</strong><div class="small opacity-75 mt-2">angry → calm → chill → happy</div></div></div>
+    <div class="col-md-3"><div class="journey-card text-center"><div class="emoji-row">😀→🎉</div><strong>Happy</strong><div class="small opacity-75 mt-2">happy → chill → party</div></div></div>
+    <div class="col-md-3"><div class="journey-card text-center"><div class="emoji-row">😐→😀</div><strong>Neutral</strong><div class="small opacity-75 mt-2">neutral → uplift → happy</div></div></div>
+  </div>
+</section>
+
+<section class="container my-5">
+  <div class="glass p-4 p-md-5">
+    <h2 class="text-center mb-4">Features</h2>
+    <div class="row g-3">
+      <div class="col-md-6"><div class="d-flex"><span class="me-3 fs-3">📷</span><div><strong>Live webcam detection</strong><div class="small opacity-75">No file upload needed — point and detect.</div></div></div></div>
+      <div class="col-md-6"><div class="d-flex"><span class="me-3 fs-3">🔗</span><div><strong>YouTube / Spotify / SoundCloud</strong><div class="small opacity-75">Embed external tracks alongside local MP3s.</div></div></div></div>
+      <div class="col-md-6"><div class="d-flex"><span class="me-3 fs-3">🎵</span><div><strong>Auto-advancing playlist</strong><div class="small opacity-75">Prev / Next / Shuffle / Auto-advance controls.</div></div></div></div>
+      <div class="col-md-6"><div class="d-flex"><span class="me-3 fs-3">👤</span><div><strong>User accounts & history</strong><div class="small opacity-75">Sign up, log in, browse past predictions.</div></div></div></div>
+      <div class="col-md-6"><div class="d-flex"><span class="me-3 fs-3">🛠️</span><div><strong>Django admin panel</strong><div class="small opacity-75">Manage songs and view all predictions.</div></div></div></div>
+      <div class="col-md-6"><div class="d-flex"><span class="me-3 fs-3">🪂</span><div><strong>Graceful fallback</strong><div class="small opacity-75">Works even when DeepFace can't run.</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="container my-5">
+  <div class="glass p-4 p-md-5">
+    <h2 class="text-center mb-4">Tech stack</h2>
+    <div class="text-center">
+      <span class="badge badge-tech fs-6 m-1 p-2">Python 3.10+</span>
+      <span class="badge badge-tech fs-6 m-1 p-2">Django 4.2</span>
+      <span class="badge badge-tech fs-6 m-1 p-2">DeepFace</span>
+      <span class="badge badge-tech fs-6 m-1 p-2">TensorFlow / Keras</span>
+      <span class="badge badge-tech fs-6 m-1 p-2">SQLite</span>
+      <span class="badge badge-tech fs-6 m-1 p-2">Bootstrap 5</span>
+      <span class="badge badge-tech fs-6 m-1 p-2">getUserMedia API</span>
+      <span class="badge badge-tech fs-6 m-1 p-2">HTML5 Audio</span>
+    </div>
+  </div>
+</section>
+
+<section class="container my-5 text-center">
+  <h2 class="mb-3">Get started in 3 commands</h2>
+  <pre class="text-start mx-auto p-3 rounded" style="background: rgba(0,0,0,0.35); max-width: 600px;"><code>git clone https://github.com/maheshmasanam123/emotion-detection-django.git
+cd emotion-detection-django
+setup.bat        # or: ./setup.sh on macOS/Linux</code></pre>
+  <a href="https://github.com/maheshmasanam123/emotion-detection-django#-quick-start" class="btn btn-light mt-3">Full setup guide ↗</a>
+</section>
+
+<footer class="container text-center py-5">
+  <p class="mb-1">Built by <a href="https://github.com/maheshmasanam123" class="text-white">maheshmasanam123</a></p>
+  <p class="small">MIT Licensed · Final-year college project · 2026</p>
+</footer>
+
+</body>
+</html>
