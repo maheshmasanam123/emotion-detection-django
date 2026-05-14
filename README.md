@@ -1,86 +1,91 @@
-# FaceMood Music — Mood-Based Music Player
+# FaceMood Music — Live Mood Detection & Music Journey
 
-A Django web app that **detects emotion from a face photo** and **plays matching music**. Upload a selfie, the app classifies your mood as *angry / happy / neutral / sad* using a pretrained facial-emotion model (DeepFace), then instantly streams a playlist tagged with that mood.
+A Django web app that **detects your emotion live from the webcam** and plays a **mood-journey playlist** — songs that meet you where you are emotionally and gradually lift you to where you want to be. Music can be uploaded files **or** YouTube / Spotify / SoundCloud links.
 
 > Final-year college project — Computer Science.
 
-## Features
+## ✨ Highlights
 
-- 📸 **Face → emotion detection** using DeepFace (pretrained, no training needed)
-- 🎵 **Mood-tagged music library** — songs in admin tagged with `angry / happy / neutral / sad`
-- ▶️ **Auto-playing music player** with Prev / Next / Shuffle controls and clickable playlist
-- 🔐 User auth (signup, login, logout)
-- 📚 **Library page** browsing songs by mood
-- 🕓 Per-user prediction history
-- 🛠 Django admin panel for uploading songs and viewing predictions
-- 🪂 Graceful fallback predictor when DeepFace isn't installed (UI keeps working)
+- 📷 **Live webcam detection** — opens your camera, captures a frame, predicts your mood with DeepFace. No file upload needed.
+- 🎵 **Mood-journey playlists** — instead of just matching your mood, the app *guides* it:
+  - **Sad** → Motivation → Uplift → Happy
+  - **Angry** → Calm → Chill → Happy
+  - **Happy** → Chill → Party
+  - **Neutral** → Uplift → Happy
+- 🔗 **Bring any music** — local MP3 uploads **or** YouTube / Spotify / SoundCloud links, embedded inline with auto-advance.
+- 🔐 User auth + per-user prediction history.
+- 🛠 Django admin to manage songs and view all predictions.
+- 🪂 Graceful fallback if DeepFace isn't installed (stub predictor keeps the UI working).
+
+## 🎬 How a user experiences it
+
+1. **Click "📷 Live"** in the navbar.
+2. Browser asks for camera permission → live video appears.
+3. Click **Auto-detect (3s countdown)** or **Detect now**.
+4. The app captures a frame, classifies emotion (angry / happy / neutral / sad), and redirects to the player.
+5. The player loads a **mood-journey playlist** with phase badges (e.g. `Sad → Motivation → Uplift → Happy`) and starts playing the first track — local audio or embedded YouTube/Spotify iframe.
+6. Auto-advance, Shuffle, Prev/Next controls — all built-in.
 
 ## Tech stack
 
-| Layer    | Tool                                |
-|----------|-------------------------------------|
-| Backend  | Django 4.2+                         |
-| Database | SQLite (zero-config)                |
-| ML       | DeepFace (wraps TensorFlow / Keras) |
-| Audio    | HTML5 `<audio>` (MP3 streaming)     |
-| Frontend | Bootstrap 5                         |
-| Language | Python 3.10+                        |
+| Layer    | Tool                                                                   |
+|----------|------------------------------------------------------------------------|
+| Backend  | Django 4.2+                                                            |
+| Database | SQLite (zero-config)                                                   |
+| ML       | DeepFace (pretrained — wraps TensorFlow/Keras)                         |
+| Camera   | Browser `getUserMedia` API → POST base64 frame to Django               |
+| Audio    | HTML5 `<audio>` (local files) + YouTube / Spotify / SoundCloud iframes |
+| Frontend | Bootstrap 5, vanilla JS                                                |
+| Language | Python 3.10+                                                           |
 
-## Quick start (anyone can run this in 3 steps)
+## 🚀 Quick start
 
 ### Prerequisites
-Install **Python 3.10 or newer** from https://www.python.org/downloads/
-(On Windows, tick **"Add Python to PATH"** during install.)
+Install **Python 3.10+** from https://www.python.org/downloads/
+(Windows: tick **"Add Python to PATH"** during install.)
 
-### 1. Clone the repo
+### 1. Clone
 ```bash
 git clone https://github.com/<YOUR-USERNAME>/emotion-detection-django.git
 cd emotion-detection-django
 ```
 
-### 2. Run the setup script
-**Windows:**
-```bat
-setup.bat
-```
-**macOS / Linux:**
+### 2. Run setup
+**Windows:** `setup.bat`
+**macOS / Linux:** `chmod +x setup.sh && ./setup.sh`
+
+The script: creates a virtualenv → installs deps → migrates DB → starts the server at http://127.0.0.1:8000/
+
+### 3. Add songs & try it
+
+In a second terminal (venv active):
 ```bash
-chmod +x setup.sh
-./setup.sh
+python manage.py createsuperuser
 ```
 
-The script will:
-1. Create a virtualenv in `.venv/`
-2. Install all dependencies
-3. Run database migrations
-4. Start the dev server at **http://127.0.0.1:8000/**
+1. Visit http://127.0.0.1:8000/admin/ → log in → **Songs** → **Add song**
+2. For each song:
+   - **Title**, **Artist** (optional), **Mood** (pick one of *angry / calm / chill / sad / motivation / uplift / happy / neutral / party*)
+   - Either upload an **audio file** OR paste an **external URL** (YouTube, Spotify, or SoundCloud)
+3. Add a few songs across the moods listed in [Mood journeys](#-mood-journeys) so playlists are non-empty.
+4. Visit http://127.0.0.1:8000/, sign up as a regular user, click **📷 Live**, allow camera access — the app detects your mood and starts the journey. 🎉
 
-### 3. Add some songs and try it
+> 💡 **Camera tip:** Modern browsers require HTTPS or `localhost` for camera access. `127.0.0.1` and `localhost` both work locally. For deployment, you'll need HTTPS.
 
-1. Create an admin user (in a second terminal, with the venv activated):
-   ```bash
-   python manage.py createsuperuser
-   ```
-2. Open http://127.0.0.1:8000/admin/ → log in → **Songs** → **Add song**
-3. Upload an MP3, give it a title/artist, and pick a mood (`angry / happy / neutral / sad`)
-4. Add at least one song per mood for the best experience.
-5. Go back to http://127.0.0.1:8000/, sign up as a regular user, click **Detect & Play**, and upload a face photo.
+## 🗺️ Mood journeys
 
-🎉 The app will detect your mood and start playing the matching playlist instantly.
+Defined in [`mp/journey.py`](mp/journey.py):
 
-## Manual setup (if scripts don't work)
+| Detected emotion | Journey                                |
+|------------------|----------------------------------------|
+| **Sad**          | sad → motivation → uplift → happy      |
+| **Angry**        | angry → calm → chill → happy           |
+| **Happy**        | happy → chill → party                  |
+| **Neutral**      | neutral → uplift → happy               |
 
-```bash
-python -m venv .venv
-# Windows:    .venv\Scripts\activate
-# macOS/Linux: source .venv/bin/activate
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py createsuperuser   # for admin / uploading songs
-python manage.py runserver
-```
+The view picks ~4 songs per phase, in order, so the playlist transitions naturally.
 
-## Project structure
+## 📁 Project structure
 
 ```
 .
@@ -89,65 +94,64 @@ python manage.py runserver
 ├── requirements.txt
 ├── config/                 # Django project (settings, urls, wsgi)
 ├── accounts/               # signup, login, logout
-├── mp/                     # main app (music player)
-│   ├── models.py           # Song + Prediction models
-│   ├── views.py            # upload, result (player), library, history
+├── mp/                     # main app
+│   ├── models.py           # Song (with external URL) + Prediction
+│   ├── views.py            # live, upload, result, library, history, predict-frame API
 │   ├── emotion.py          # DeepFace wrapper → 4-class output
-│   └── admin.py            # song management
-├── templates/              # HTML (Bootstrap 5)
-├── static/css/             # styles
-├── media/
-│   ├── songs/              # uploaded audio (gitignored)
-│   ├── covers/             # song cover art (gitignored)
-│   └── uploads/            # user-uploaded face photos (gitignored)
-└── dataset/                # optional reference images for the 4 mood classes
+│   ├── journey.py          # mood-journey definitions + YouTube/Spotify embed helpers
+│   └── admin.py
+├── templates/
+│   ├── base.html
+│   ├── accounts/           # login, signup
+│   └── mp/                 # home, live (webcam), upload, result (player), library, history
+├── static/css/
+└── media/                  # uploaded audio, covers, face images (gitignored)
 ```
 
-## How it works
+## 🔬 How prediction works
 
-1. **Upload** — user uploads a face photo on `/upload/`.
-2. **Predict** — `mp/emotion.py` calls `DeepFace.analyze(actions=["emotion"])`. DeepFace returns scores for 7 emotions; we collapse them into 4 target moods:
+1. **Capture** — `templates/mp/live.html` uses `navigator.mediaDevices.getUserMedia` to access the webcam, draws a frame to a `<canvas>`, and serialises it as a base64 JPEG data URL.
+2. **POST** — sends the data URL to `POST /api/predict-frame/` (CSRF-protected).
+3. **Predict** — `mp/emotion.py` calls `DeepFace.analyze(actions=["emotion"])`. DeepFace returns 7 emotion scores; we collapse them to 4 target classes:
 
-   | DeepFace class    | Mapped to   |
+   | DeepFace          | Mapped to   |
    |-------------------|-------------|
    | angry, disgust    | **angry**   |
    | fear, sad         | **sad**     |
    | happy, surprise   | **happy**   |
    | neutral           | **neutral** |
 
-3. **Match** — the view queries `Song.objects.filter(mood=predicted_mood)` and shuffles up to 20 results.
-4. **Play** — the result page renders an HTML5 audio player that auto-plays the first track and queues the rest, with Prev / Next / Shuffle controls.
+4. **Journey** — `mp/journey.py` maps the detected mood to its phase sequence, and the result view queries `Song.objects.filter(mood=phase)` for each phase.
+5. **Play** — `result.html` renders an HTML5 `<audio>` for local files or a YouTube/Spotify/SoundCloud `<iframe>` for external URLs. Auto-advances to the next track on `ended`.
 
-If DeepFace is missing or face detection fails, a deterministic stub predictor returns a plausible mood so the UI never breaks.
+## 🧰 Adding songs
 
-## Adding music
+Songs are managed in the Django admin. Each Song needs:
 
-Songs are managed through the Django admin (`/admin/mp/song/add/`). Each song has:
-
-- **Title** (required)
-- **Artist** (optional)
-- **Mood** — one of `angry / happy / neutral / sad`
-- **Audio file** — MP3 / OGG / WAV
+- **Title** (required), **Artist** (optional)
+- **Mood** — pick from the 9 mood tags
+- **Either** an uploaded audio file **or** an external URL (YouTube / Spotify / SoundCloud — auto-detected on save)
 - **Cover image** (optional)
 
-Tip: bulk-add by uploading MP3s to `media/songs/` first, then creating Song records pointing at them.
+You can mix sources freely — a single playlist phase can contain MP3s, YouTube videos, and Spotify tracks side-by-side.
 
-## Notes
+## ⚠️ Notes
 
-- First DeepFace call downloads model weights (~5 MB), cached at `~/.deepface/`.
-- All uploaded media is stored under `media/` and gitignored — content stays on your machine.
-- `SECRET_KEY`, `DEBUG`, and `ALLOWED_HOSTS` are environment-variable configurable for deployment.
-- Browser auto-play policies may require the user to interact with the page once before audio starts.
+- First DeepFace prediction downloads model weights (~5 MB), cached at `~/.deepface/`.
+- Browser autoplay policies may require one user click before audio plays.
+- All uploaded media is gitignored — content stays local.
+- Camera access requires HTTPS in production (works on `localhost` for dev).
 
-## Troubleshooting
+## 🛠️ Troubleshooting
 
-| Issue                                  | Fix                                                                  |
-|----------------------------------------|----------------------------------------------------------------------|
-| `python` is not recognized             | Reinstall Python with **"Add to PATH"** ticked                       |
-| DeepFace install fails on Windows      | `pip install --upgrade pip` first, then `pip install -r requirements.txt` |
-| "No songs for this mood"               | Add songs in admin and tag them with the mood                        |
-| Audio doesn't auto-play                | Browser policy — click anywhere on the page once, then it'll play    |
-| Port 8000 already in use               | `python manage.py runserver 8080`                                    |
+| Issue                              | Fix                                                                  |
+|------------------------------------|----------------------------------------------------------------------|
+| Camera permission denied           | Allow camera in your browser's site settings, then reload            |
+| `python` not recognized            | Reinstall Python with **"Add to PATH"** ticked                       |
+| DeepFace install fails             | `pip install --upgrade pip` then re-run                              |
+| "No songs for this mood"           | Add songs in admin tagged with the missing mood                      |
+| YouTube embed shows "Video unavailable" | The video has embedding disabled; try another link              |
+| Port 8000 in use                   | `python manage.py runserver 8080`                                    |
 
 ## License
 

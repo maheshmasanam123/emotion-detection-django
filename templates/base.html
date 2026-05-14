@@ -15,7 +15,8 @@
     <div class="collapse navbar-collapse">
       <ul class="navbar-nav ms-auto">
         {% if user.is_authenticated %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'mp:upload' %}">Detect &amp; Play</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'mp:live' %}">📷 Live</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'mp:upload' %}">Upload</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'mp:library' %}">Library</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'mp:history' %}">History</a></li>
           <li class="nav-item"><span class="nav-link text-info">{{ user.username }}</span></li>

@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Now Playing &middot; FaceMood{% endblock %}
+{% block title %}Mood journey &middot; FaceMood Music{% endblock %}
 {% block content %}
 <div class="row g-4">
-  <div class="col-md-5">
+  <div class="col-md-4">
     <div class="card shadow-sm">
-      <img src="{{ prediction.image.url }}" class="card-img-top" alt="uploaded">
+      <img src="{{ prediction.image.url }}" class="card-img-top" alt="captured">
       <div class="card-body">
         <h4 class="text-capitalize mb-1">Mood: {{ prediction.predicted_emotion }}</h4>
         <div class="small text-muted">Confidence: {{ prediction.confidence|floatformat:2 }}</div>
@@ -22,55 +22,76 @@
           </div>
         {% endfor %}
 
-        <a href="{% url 'mp:upload' %}" class="btn btn-primary btn-sm mt-2">Predict another</a>
+        <a href="{% url 'mp:live' %}" class="btn btn-primary btn-sm mt-2">📷 Detect again</a>
+        <a href="{% url 'mp:upload' %}" class="btn btn-outline-secondary btn-sm mt-2">Upload photo</a>
       </div>
     </div>
   </div>
 
-  <div class="col-md-7">
+  <div class="col-md-8">
     <div class="card shadow-sm">
       <div class="card-body">
-        <h2 class="card-title mb-3">🎵 Now Playing</h2>
-        {% if playlist %}
-          <div id="now-playing" class="mb-3">
+        <h2 class="card-title mb-2">🎵 Your mood journey</h2>
+        <div class="mb-3">
+          {% for p in phases %}
+            <span class="badge bg-primary fs-6 me-1 text-capitalize">{{ p.caption }}</span>
+            {% if not forloop.last %}<span class="text-muted mx-1">→</span>{% endif %}
+          {% endfor %}
+        </div>
+
+        {% if journey_playlist %}
+          <div id="now-playing" class="mb-3 p-3 bg-light rounded">
             <div class="d-flex align-items-center">
-              {% with first=playlist.0 %}
-                {% if first.cover %}
-                  <img src="{{ first.cover.url }}" id="cover-art" style="width:80px;height:80px;object-fit:cover;border-radius:8px;" class="me-3">
+              {% with first=journey_playlist.0 %}
+                {% if first.song.cover %}
+                  <img src="{{ first.song.cover.url }}" id="cover-art" style="width:80px;height:80px;object-fit:cover;border-radius:8px;" class="me-3">
                 {% else %}
-                  <div id="cover-art" style="width:80px;height:80px;background:#eee;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px;" class="me-3">🎶</div>
+                  <div id="cover-art-fallback" style="width:80px;height:80px;background:#dee2e6;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px;" class="me-3">🎶</div>
                 {% endif %}
-                <div>
-                  <div id="track-title" class="fw-bold fs-5">{{ first.title }}</div>
-                  <div id="track-artist" class="text-muted">{{ first.artist|default:"Unknown artist" }}</div>
+                <div class="flex-grow-1">
+                  <div class="small text-muted text-capitalize"><span id="track-phase">{{ first.phase_caption }}</span></div>
+                  <div id="track-title" class="fw-bold fs-5">{{ first.song.title }}</div>
+                  <div id="track-artist" class="text-muted">{{ first.song.artist|default:"Unknown artist" }}</div>
                 </div>
               {% endwith %}
             </div>
-            <audio id="audio-player" controls autoplay class="w-100 mt-3">
-              <source src="{{ playlist.0.audio.url }}" type="audio/mpeg">
-              Your browser does not support audio playback.
-            </audio>
-            <div class="mt-2 d-flex gap-2">
+
+            <div id="player-container" class="mt-3">
+              {# Initial player is rendered by JS based on first track #}
+            </div>
+
+            <div class="mt-2 d-flex gap-2 flex-wrap">
               <button class="btn btn-outline-secondary btn-sm" onclick="playPrev()">⏮ Prev</button>
               <button class="btn btn-outline-secondary btn-sm" onclick="playNext()">Next ⏭</button>
               <button class="btn btn-outline-secondary btn-sm" onclick="toggleShuffle()">🔀 <span id="shuffle-label">Shuffle: off</span></button>
+              <button class="btn btn-outline-secondary btn-sm" onclick="toggleAutoplay()">⏩ <span id="auto-label">Auto-advance: on</span></button>
             </div>
           </div>
 
-          <h6 class="mt-4 mb-2 text-capitalize">{{ prediction.predicted_emotion }} playlist ({{ playlist|length }} songs)</h6>
+          <h6 class="mt-4 mb-2">Playlist ({{ journey_playlist|length }} tracks)</h6>
           <ul class="list-group" id="playlist">
-            {% for song in playlist %}
-              <li class="list-group-item d-flex justify-content-between align-items-center playlist-item {% if forloop.first %}active{% endif %}"
+            {% for item in journey_playlist %}
+              <li class="list-group-item playlist-item d-flex justify-content-between align-items-center {% if forloop.first %}active{% endif %}"
                   data-index="{{ forloop.counter0 }}"
-                  data-title="{{ song.title }}"
-                  data-artist="{{ song.artist|default:'Unknown artist' }}"
-                  data-src="{{ song.audio.url }}"
-                  data-cover="{% if song.cover %}{{ song.cover.url }}{% endif %}"
+                  data-title="{{ item.song.title }}"
+                  data-artist="{{ item.song.artist|default:'Unknown artist' }}"
+                  data-phase="{{ item.phase_caption }}"
+                  data-cover="{% if item.song.cover %}{{ item.song.cover.url }}{% endif %}"
+                  data-audio="{% if item.song.audio %}{{ item.song.audio.url }}{% endif %}"
+                  data-embed="{{ item.embed_url|default:'' }}"
+                  data-source="{{ item.song.source }}"
+                  data-external="{{ item.song.external_url|default:'' }}"
                   onclick="playIndex({{ forloop.counter0 }})"
                   style="cursor:pointer;">
                 <div>
-                  <div class="fw-semibold">{{ song.title }}</div>
-                  <div class="small text-muted">{{ song.artist|default:"Unknown artist" }}</div>
+                  <div class="small text-muted text-capitalize">{{ item.phase_caption }}</div>
+                  <div class="fw-semibold">{{ item.song.title }}</div>
+                  <div class="small text-muted">
+                    {{ item.song.artist|default:"Unknown artist" }}
+                    {% if item.song.source != "local" %}
+                      <span class="badge bg-secondary ms-1 text-uppercase">{{ item.song.source }}</span>
+                    {% endif %}
+                  </div>
                 </div>
                 <span class="badge bg-primary rounded-pill">▶</span>
               </li>
@@ -78,8 +99,8 @@
           </ul>
         {% else %}
           <div class="alert alert-warning">
-            <strong>No {{ prediction.predicted_emotion }} songs in the library yet.</strong>
-            <p class="mb-2 mt-2">Add songs from the Django admin panel and tag them with the matching mood.</p>
+            <strong>Your mood journey is ready, but no songs are tagged yet.</strong>
+            <p class="mb-2 mt-2">Add songs in the admin and tag them with these moods: <strong>{% for p in phases %}{{ p.key }}{% if not forloop.last %}, {% endif %}{% endfor %}</strong>. You can upload audio files OR paste YouTube / Spotify / SoundCloud links.</p>
             <a href="/admin/mp/song/add/" class="btn btn-sm btn-primary">Add a song</a>
             <a href="{% url 'mp:library' %}" class="btn btn-sm btn-outline-secondary">View library</a>
           </div>
@@ -91,22 +112,45 @@
 
 <script>
   const items = Array.from(document.querySelectorAll('.playlist-item'));
-  const audio = document.getElementById('audio-player');
+  const playerContainer = document.getElementById('player-container');
   const titleEl = document.getElementById('track-title');
   const artistEl = document.getElementById('track-artist');
-  const coverEl = document.getElementById('cover-art');
+  const phaseEl = document.getElementById('track-phase');
+  const coverEl = document.getElementById('cover-art') || document.getElementById('cover-art-fallback');
   let current = 0;
   let shuffle = false;
+  let autoAdvance = true;
+
+  function renderPlayer(item) {
+    const audio = item.dataset.audio;
+    const embed = item.dataset.embed;
+    const external = item.dataset.external;
+
+    if (audio) {
+      playerContainer.innerHTML =
+        '<audio id="audio-player" controls autoplay class="w-100"><source src="' + audio + '"></audio>';
+      const a = document.getElementById('audio-player');
+      a.addEventListener('ended', () => { if (autoAdvance) playNext(); });
+    } else if (embed) {
+      playerContainer.innerHTML =
+        '<div class="ratio ratio-16x9"><iframe src="' + embed + '" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>';
+    } else if (external) {
+      playerContainer.innerHTML =
+        '<a href="' + external + '" target="_blank" class="btn btn-primary">Open external link ↗</a>';
+    } else {
+      playerContainer.innerHTML = '<div class="text-muted small">No playable source for this track.</div>';
+    }
+  }
 
   function playIndex(i) {
     if (!items.length) return;
     current = ((i % items.length) + items.length) % items.length;
     const el = items[current];
-    audio.src = el.dataset.src;
     titleEl.textContent = el.dataset.title;
     artistEl.textContent = el.dataset.artist;
-    if (el.dataset.cover && coverEl.tagName === 'IMG') coverEl.src = el.dataset.cover;
-    audio.play();
+    phaseEl.textContent = el.dataset.phase;
+    if (el.dataset.cover && coverEl && coverEl.tagName === 'IMG') coverEl.src = el.dataset.cover;
+    renderPlayer(el);
     items.forEach(x => x.classList.remove('active'));
     el.classList.add('active');
   }
@@ -119,6 +163,11 @@
     shuffle = !shuffle;
     document.getElementById('shuffle-label').textContent = 'Shuffle: ' + (shuffle ? 'on' : 'off');
   }
-  if (audio) audio.addEventListener('ended', playNext);
+  function toggleAutoplay() {
+    autoAdvance = !autoAdvance;
+    document.getElementById('auto-label').textContent = 'Auto-advance: ' + (autoAdvance ? 'on' : 'off');
+  }
+
+  if (items.length) playIndex(0);
 </script>
 {% endblock %}

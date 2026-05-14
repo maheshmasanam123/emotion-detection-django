@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Live mood detection &middot; FaceMood Music{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="card-title mb-1">📸 Live mood detection</h2>
+        <p class="text-muted">Allow camera access, position your face in the frame, and the app will detect your mood automatically.</p>
+
+        <div class="ratio ratio-4x3 mb-3 bg-dark rounded overflow-hidden">
+          <video id="video" autoplay playsinline muted></video>
+        </div>
+
+        <canvas id="snapshot" class="d-none"></canvas>
+
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+          <button id="detect-btn" class="btn btn-primary" disabled>📷 Detect now</button>
+          <button id="auto-btn" class="btn btn-outline-primary" disabled>▶ Auto-detect (3s countdown)</button>
+          <span id="status" class="text-muted small ms-2">Initialising camera…</span>
+        </div>
+
+        <div id="error" class="alert alert-danger mt-3 d-none"></div>
+        <div id="result" class="mt-3 d-none">
+          <h5>Detected mood: <span id="mood-label" class="text-capitalize fw-bold"></span></h5>
+          <p class="small text-muted">Confidence: <span id="conf"></span> — redirecting to your playlist…</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('snapshot');
+  const detectBtn = document.getElementById('detect-btn');
+  const autoBtn = document.getElementById('auto-btn');
+  const statusEl = document.getElementById('status');
+  const errorEl = document.getElementById('error');
+  const resultEl = document.getElementById('result');
+  const moodEl = document.getElementById('mood-label');
+  const confEl = document.getElementById('conf');
+
+  const csrfToken = document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1] || '';
+
+  async function initCamera() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+      video.srcObject = stream;
+      await video.play();
+      statusEl.textContent = 'Camera ready. Look at the camera and click Detect.';
+      detectBtn.disabled = false;
+      autoBtn.disabled = false;
+    } catch (err) {
+      errorEl.classList.remove('d-none');
+      errorEl.textContent = 'Could not access camera: ' + err.message + ' — please allow camera permission.';
+      statusEl.textContent = '';
+    }
+  }
+
+  function captureFrame() {
+    const w = video.videoWidth, h = video.videoHeight;
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(video, 0, 0, w, h);
+    return canvas.toDataURL('image/jpeg', 0.85);
+  }
+
+  async function detect() {
+    detectBtn.disabled = true;
+    autoBtn.disabled = true;
+    statusEl.textContent = 'Analysing your face…';
+    const dataUrl = captureFrame();
+    const body = new FormData();
+    body.append('image_data', dataUrl);
+    try {
+      const res = await fetch('{% url "mp:api_predict_frame" %}', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken },
+        body,
+      });
+      if (!res.ok) throw new Error('Server error ' + res.status);
+      const json = await res.json();
+      moodEl.textContent = json.mood;
+      confEl.textContent = (json.confidence * 100).toFixed(1) + '%';
+      resultEl.classList.remove('d-none');
+      statusEl.textContent = '';
+      setTimeout(() => { window.location.href = json.result_url; }, 1200);
+    } catch (err) {
+      errorEl.classList.remove('d-none');
+      errorEl.textContent = 'Detection failed: ' + err.message;
+      detectBtn.disabled = false;
+      autoBtn.disabled = false;
+    }
+  }
+
+  async function autoDetect() {
+    autoBtn.disabled = true;
+    detectBtn.disabled = true;
+    for (let i = 3; i > 0; i--) {
+      statusEl.textContent = 'Hold still… ' + i;
+      await new Promise(r => setTimeout(r, 1000));
+    }
+    detect();
+  }
+
+  detectBtn.addEventListener('click', detect);
+  autoBtn.addEventListener('click', autoDetect);
+
+  initCamera();
+})();
+</script>
+{% endblock %}
